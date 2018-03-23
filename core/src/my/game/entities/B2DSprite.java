@@ -37,8 +37,8 @@ public class B2DSprite {
 
     public void render(SpriteBatch sb){
         sb.begin();
-        /*sb.draw(animation.getFrame(),body.getPosition().x * B2DVars.PPM - width / 2,
-                body.getPosition().y * B2DVars.PPM - height/2 );*/
+        sb.draw(animation.getFrame(),body.getPosition().x * B2DVars.PPM - width / 2,
+                body.getPosition().y * B2DVars.PPM - height/2 );
         sb.end();
     }
 

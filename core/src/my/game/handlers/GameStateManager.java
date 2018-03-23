@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 
 import java.util.Stack;
 import my.game.states.GameState;
+import my.game.states.Menu;
 import my.game.states.Play;
 
 /**
@@ -17,11 +18,13 @@ public class GameStateManager {
     private Stack<GameState> gameStates;
 
     public static final int PLAY = 2182301;
+    public static final int MENU = 823183;
+
 
     public GameStateManager(my.game.Game game){
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(PLAY);
+        pushState(MENU);
     }
 
     public my.game.Game game(){return game;}
@@ -35,6 +38,10 @@ public class GameStateManager {
     }
 
     private GameState getState(int state){
+
+        if (state == MENU){
+            return new Menu(this);
+        }
         if (state == PLAY)
         {
             return new Play(this);

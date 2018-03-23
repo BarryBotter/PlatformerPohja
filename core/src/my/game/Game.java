@@ -13,16 +13,15 @@ import com.badlogic.gdx.math.Vector3;
 import my.game.handlers.Content;
 import my.game.handlers.GameStateManager;
 import my.game.handlers.MyInput;
+import my.game.states.Menu;
 
 public class Game implements ApplicationListener {
 
-	public static final String TITLE = "Testi Platformer";
 	public static final int V_WIDTH = 320;
 	public static final int V_HEIGHT = 240;
 	public static final int SCALE = 2;
 
-	public static final float STEP = 1 / 60f;
-	private float accum;
+	public static final float STEP = 1 / 120f;
 
 	private SpriteBatch sb;
 	private OrthographicCamera cam;
@@ -43,6 +42,13 @@ public class Game implements ApplicationListener {
 
 		res = new Content();
 		res.loadTexture("res/images/bunny.png","bunny");
+		res.loadTexture("res/images/crystal.png", "Crystal");
+		res.loadTexture("res/images/hud.png","hud");
+		res.loadTexture("res/images/bgs.png","bg");
+		res.loadTexture("res/images/menu.png","menu");
+		res.loadTexture("kuva.png","olvi");
+
+
 		sb = new SpriteBatch();
 		cam = new OrthographicCamera();
 		cam.setToOrtho(false, V_WIDTH,V_HEIGHT);
@@ -60,13 +66,10 @@ public class Game implements ApplicationListener {
 
 	@Override
 	public void render() {
-		accum += Gdx.graphics.getDeltaTime();
-		while(accum >= STEP){
 
-			accum -= STEP;
-			gsm.update(STEP);
-			gsm.render();
-		}
+		gsm.update(Gdx.graphics.getDeltaTime());
+		gsm.render();
+
 	}
 
 	@Override
