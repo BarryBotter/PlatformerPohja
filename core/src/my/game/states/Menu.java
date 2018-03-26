@@ -37,7 +37,6 @@ public class Menu extends GameState{
     private World world;
     private Box2DDebugRenderer b2dRenderer;
 
-    private Array<B2DSprite> blocks;
 
     public Menu(GameStateManager gsm) {
 
@@ -56,7 +55,7 @@ public class Menu extends GameState{
 
 
         tex = Game.res.getTexture("play");
-        playButton = new GameButton(new TextureRegion(tex, 0, 34, 58, 27), 160, 100, cam);
+        playButton = new GameButton(new TextureRegion(tex, 0, 100, 58, 27), 160, 100, cam);
 
         cam.setToOrtho(false, Game.V_WIDTH, Game.V_HEIGHT);
 
@@ -94,7 +93,7 @@ public class Menu extends GameState{
     public void handleInput() {
 
         if(playButton.isClicked()) {
-            gsm.setState(GameStateManager.PLAY);
+            gsm.setState(GameStateManager.LEVEL_SELECT);
         }
 
     }
