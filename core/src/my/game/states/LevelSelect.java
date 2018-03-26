@@ -2,7 +2,6 @@ package my.game.states;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import my.game.states.Play;
 import my.game.Game;
 import my.game.handlers.GameButton;
 import my.game.handlers.GameStateManager;
@@ -18,7 +17,7 @@ public class LevelSelect extends GameState {
 
         super(gsm);
 
-        reg = new TextureRegion(Game.res.getTexture("bgs"), 0, 0, 320, 240);
+        reg = new TextureRegion(Game.res.getTexture("bg"), 0, 0, 320, 240);
 
         TextureRegion buttonReg = new TextureRegion(Game.res.getTexture("hud"), 0, 0, 32, 32);
         buttons = new GameButton[5][5];
@@ -37,8 +36,6 @@ public class LevelSelect extends GameState {
     }
 
     public void update(float dt) {
-
-        handleInput();
 
         for(int row = 0; row < buttons.length; row++) {
             for(int col = 0; col < buttons[0].length; col++) {
@@ -69,7 +66,6 @@ public class LevelSelect extends GameState {
     }
 
     public void dispose() {
-        // everything is in the resource manager com.neet.blockbunny.handlers.Content
     }
 
 }

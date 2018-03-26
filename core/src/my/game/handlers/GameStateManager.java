@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 
 import java.util.Stack;
 import my.game.states.GameState;
+import my.game.states.LevelSelect;
 import my.game.states.Menu;
 import my.game.states.Play;
 
@@ -49,7 +50,7 @@ public class GameStateManager {
         }
         if (state == LEVEL_SELECT)
         {
-            return new Play(this);
+            return new LevelSelect(this);
         }
         return null;
     }
