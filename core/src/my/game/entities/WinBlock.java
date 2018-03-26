@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 
 import my.game.Game;
+import my.game.handlers.B2DVars;
 
 /**
  * Created by Katriina on 23.3.2018.
@@ -13,13 +14,18 @@ import my.game.Game;
 
 public class WinBlock extends B2DSprite {
 
+    Texture tex;
+
     public WinBlock(Body body) {
         super(body);
 
-        Texture tex = Game.res.getTexture("olvi");
-        TextureRegion[] sprites = TextureRegion.split(tex,1440,1850)[0];
+        tex = Game.res.getTexture("olvi");
 
-        setAnimation(sprites, 1 / 12f);
-
+    }
+    public void render(SpriteBatch sb)
+    {
+        sb.begin();
+        sb.draw(tex,body.getPosition().x * B2DVars.PPM - width / 2, body.getPosition().y * B2DVars.PPM - height/2,25,25 );
+        sb.end();
     }
 }

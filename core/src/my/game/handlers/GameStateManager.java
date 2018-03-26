@@ -19,6 +19,7 @@ public class GameStateManager {
 
     public static final int PLAY = 2182301;
     public static final int MENU = 823183;
+    public static final int LEVEL_SELECT = 323971;
 
 
     public GameStateManager(my.game.Game game){
@@ -43,6 +44,10 @@ public class GameStateManager {
             return new Menu(this);
         }
         if (state == PLAY)
+        {
+            return new Play(this);
+        }
+        if (state == LEVEL_SELECT)
         {
             return new Play(this);
         }

@@ -21,7 +21,6 @@ public class MyContacListener implements ContactListener{
     private Array<Body> bodiesToRemove;
 
     public  MyContacListener(){
-        super();
         bodiesToRemove = new Array<Body>();
     }
 
@@ -42,6 +41,12 @@ public class MyContacListener implements ContactListener{
         }
         if(fb.getUserData() != null && fb.getUserData().equals("crystal")){
             bodiesToRemove.add(fb.getBody());
+        }
+        if(fa.getUserData() != null && fa.getUserData().equals("win")){
+            //playerWin();
+        }
+        if(fb.getUserData() != null && fb.getUserData().equals("win")){
+            //playerWin();
         }
     }
 

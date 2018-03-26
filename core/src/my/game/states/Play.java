@@ -40,12 +40,15 @@ import my.game.handlers.GameStateManager;
 import my.game.handlers.MyContacListener;
 import my.game.handlers.MyInput;
 
+import static my.game.handlers.B2DVars.PPM;
+
 /**
  * Created by Katriina on 20.3.2018.
  */
 
 public class Play extends GameState {
 
+    public static int level;
     private World world;
     private Box2DDebugRenderer b2dr;
 
@@ -54,9 +57,11 @@ public class Play extends GameState {
     private Rectangle screenRightSide;
     private Rectangle screenLeftSide;
 
-    private TiledMap tiledMap;
+    private TiledMap tileMap;
+    private int tileMapWidth;
+    private int tileMapHeight;
     private int tileSize;
-    private OrthogonalTiledMapRenderer tmr;
+    private OrthogonalTiledMapRenderer tmRenderer;
 
     private MyContacListener cl;
 
@@ -85,7 +90,7 @@ public class Play extends GameState {
         cretePlayer();
 
         //create tile
-        createTiles();
+        createWalls();
 
         //create crystals
         createCrystals();
@@ -94,7 +99,6 @@ public class Play extends GameState {
         createWin();
 
         //create background
-        // create backgrounds
         Texture bgs = Game.res.getTexture("bg");
         TextureRegion sky = new TextureRegion(bgs, 0, 0, 320, 240);
         TextureRegion clouds = new TextureRegion(bgs, 0, 240, 320, 240);
@@ -106,7 +110,7 @@ public class Play extends GameState {
 
         //setup box2dcam
         b2dCam = new OrthographicCamera();
-        b2dCam.setToOrtho(false, Game.V_WIDTH / B2DVars.PPM, Game.V_HEIGHT / B2DVars.PPM);
+        b2dCam.setToOrtho(false, Game.V_WIDTH / PPM, Game.V_HEIGHT / PPM);
 
         // set up hud
         hud = new HUD(player);
@@ -128,14 +132,15 @@ public class Play extends GameState {
                 translateScreenToWorldCoordinates(x, y);
 
                 if (rightSideTouched(touchPoint.x, touchPoint.y)) {
-                    switchBlocks();
+                    //switchBlocks();
 
 
                 } else if (leftSideTouched(touchPoint.x, touchPoint.y)) {
                     Gdx.app.log("Puoli:", "vasen");
                     if (cl.isPlayerOnGround()) {
+                        player.getBody().setLinearVelocity(player.getBody().getLinearVelocity().x, 0);
                         player.getBody().applyLinearImpulse(0.3f, 6, 0, 0, true);
-                        
+
                     }
 
                 }
@@ -165,6 +170,10 @@ public class Play extends GameState {
 
         for(int i = 0; i < crystals.size; i++){
             crystals.get(i).update(dt);
+        }
+
+        if(player.getBody().getPosition().y < 0) {
+            gsm.setState(GameStateManager.MENU);
         }
     }
 
@@ -196,7 +205,7 @@ public class Play extends GameState {
 
         //set cam to follow player
         cam.position.set(
-                player.getposition().x * B2DVars.PPM + Game.V_WIDTH / 4,
+                player.getposition().x * PPM + Game.V_WIDTH / 4,
                 Game.V_HEIGHT / 2,0);
         cam.update();
 
@@ -207,8 +216,8 @@ public class Play extends GameState {
         }
 
         //draw tile map
-        tmr.setView(cam);
-        tmr.render();
+        tmRenderer.setView(cam);
+        tmRenderer.render();
 
         //draw player
         sb.setProjectionMatrix(cam.combined);
@@ -241,24 +250,24 @@ public class Play extends GameState {
         PolygonShape shape = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        bdef.position.set(70 / B2DVars.PPM, 250 / B2DVars.PPM);
-        bdef.linearVelocity.set(0.9f, 0);
+        bdef.position.set(70 / PPM, 250 / PPM);
+        bdef.linearVelocity.set(1.5f, 0);
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
         body.setGravityScale(3);
 
-        shape.setAsBox(15 / B2DVars.PPM, 15 / B2DVars.PPM);
+        shape.setAsBox(15 / PPM, 15 / PPM);
         fdef.shape = shape;
         fdef.filter.categoryBits = B2DVars.BIT_PLAYER;
-        fdef.filter.maskBits = B2DVars.BIT_RED | B2DVars.BIT_CRYSTAL;
+        fdef.filter.maskBits = B2DVars.BIT_GROUND | B2DVars.BIT_CRYSTAL;
         body.createFixture(fdef).setUserData("player");
         shape.dispose();
 
         //create foot sensor
-        shape.setAsBox(15 / B2DVars.PPM, 2 / B2DVars.PPM, new Vector2(0, -15 / B2DVars.PPM), 0);
+        shape.setAsBox(15 / PPM, 2 / PPM, new Vector2(0, -15 / PPM), 0);
         fdef.shape = shape;
         fdef.filter.categoryBits = B2DVars.BIT_PLAYER;
-        fdef.filter.maskBits = B2DVars.BIT_RED;
+        fdef.filter.maskBits = B2DVars.BIT_GROUND;
         fdef.isSensor = true;
         body.createFixture(fdef).setUserData("foot");
         shape.dispose();
@@ -267,68 +276,74 @@ public class Play extends GameState {
         player = new Player(body);
     }
 
-    private void createTiles() {
+    private void createWalls() {
 
+        // load tile map and map renderer
+        try {
+            tileMap = new TmxMapLoader().load("res/maps/level" + level + ".tmx");
+        }
+        catch(Exception e) {
+            System.out.println("Cannot find file: res/maps/level" + level + ".tmx");
+            Gdx.app.exit();
+        }
+        tileMapWidth = tileMap.getProperties().get("width", Integer.class);
+        tileMapHeight = tileMap.getProperties().get("height", Integer.class);
+        tileSize = tileMap.getProperties().get("tilewidth", Integer.class);
+        tmRenderer = new OrthogonalTiledMapRenderer(tileMap);
 
-        //load tilemap
-        tiledMap = new TmxMapLoader().load("res/maps/level0.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap);
-
+        // read each of the "red" "green" and "blue" layers
         TiledMapTileLayer layer;
+        layer = (TiledMapTileLayer) tileMap.getLayers().get("platforms");
+        createBlocks(layer, B2DVars.BIT_GROUND);
 
-        tileSize = tiledMap.getProperties().get("tilewidth", Integer.class);
-
-        layer = (TiledMapTileLayer) tiledMap.getLayers().get("red");
-        createLayer(layer, B2DVars.BIT_RED);
-        layer = (TiledMapTileLayer) tiledMap.getLayers().get("green");
-        createLayer(layer, B2DVars.BIT_GREEN);
-        layer = (TiledMapTileLayer) tiledMap.getLayers().get("blue");
-        createLayer(layer, B2DVars.BIT_BLUE);
 
     }
 
-    private void createLayer(TiledMapTileLayer layer, short bits) {
 
+    private void createBlocks(TiledMapTileLayer layer, short bits) {
 
-        BodyDef bdef = new BodyDef();
-        FixtureDef fdef = new FixtureDef();
+        // tile size
+        float ts = layer.getTileWidth();
 
-        for (int row = 0; row < layer.getHeight(); row++) {
-            for (int col = 0; col < layer.getWidth(); col++) {
+        // go through all cells in layer
+        for(int row = 0; row < layer.getHeight(); row++) {
+            for(int col = 0; col < layer.getWidth(); col++) {
 
-                //get cell
+                // get cell
                 TiledMapTileLayer.Cell cell = layer.getCell(col, row);
 
-                // check if cell exist
-                if (cell == null) continue;
-                if (cell.getTile() == null) continue;
+                // check that there is a cell
+                if(cell == null) continue;
+                if(cell.getTile() == null) continue;
 
-                //create a body and fixture from cell
+                // create body from cell
+                BodyDef bdef = new BodyDef();
                 bdef.type = BodyDef.BodyType.StaticBody;
-                bdef.position.set((col + 0.5f) * tileSize / B2DVars.PPM, (row + 0.5f) * tileSize / B2DVars.PPM);
-
+                bdef.position.set((col + 0.5f) * ts / PPM, (row + 0.5f) * ts / PPM);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[3];
-                v[0] = new Vector2(-tileSize / 2 / B2DVars.PPM, -tileSize / 2 / B2DVars.PPM);
-                v[1] = new Vector2(-tileSize / 2 / B2DVars.PPM, tileSize / 2 / B2DVars.PPM);
-                v[2] = new Vector2(tileSize / 2 / B2DVars.PPM, tileSize / 2 / B2DVars.PPM);
+                v[0] = new Vector2(-ts / 2 / PPM, -ts / 2 / PPM);
+                v[1] = new Vector2(-ts / 2 / PPM, ts / 2 / PPM);
+                v[2] = new Vector2(ts / 2 / PPM, ts / 2 / PPM);
                 cs.createChain(v);
-                fdef.friction = 0;
-                fdef.shape = cs;
-                fdef.filter.categoryBits = bits;
-                fdef.filter.maskBits = B2DVars.BIT_PLAYER;
-                fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef);
+                FixtureDef fd = new FixtureDef();
+                fd.friction = 0;
+                fd.shape = cs;
+                fd.filter.categoryBits = bits;
+                fd.filter.maskBits = B2DVars.BIT_PLAYER;
+                world.createBody(bdef).createFixture(fd);
                 cs.dispose();
+
             }
         }
 
     }
 
+
     private void createCrystals() {
         crystals = new Array<PickUp>();
 
-        MapLayer layer = tiledMap.getLayers().get("crystals");
+        MapLayer layer = tileMap.getLayers().get("crystals");
 
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -337,13 +352,13 @@ public class Play extends GameState {
 
             bdef.type = BodyDef.BodyType.StaticBody;
 
-            float x = mo.getProperties().get("x", float.class) / B2DVars.PPM;
-            float y = mo.getProperties().get("y", float.class) / B2DVars.PPM;
+            float x = mo.getProperties().get("x", float.class) / PPM;
+            float y = mo.getProperties().get("y", float.class) / PPM;
 
             bdef.position.set(x, y);
 
             CircleShape cshape = new CircleShape();
-            cshape.setRadius(8 / B2DVars.PPM);
+            cshape.setRadius(8 / PPM);
 
             fdef.shape = cshape;
             fdef.isSensor = true;
@@ -361,41 +376,9 @@ public class Play extends GameState {
         }
     }
 
-    private void switchBlocks(){
-        Filter filter =
-                player.getBody().getFixtureList().first().getFilterData();
-
-        short bits = filter.maskBits;
-
-        //next color
-
-        if ((bits & B2DVars.BIT_RED) != 0){
-            bits &= ~B2DVars.BIT_RED;
-            bits |= B2DVars.BIT_GREEN;
-        }
-        else if ((bits & B2DVars.BIT_GREEN) != 0){
-            bits &= ~B2DVars.BIT_GREEN;
-            bits |= B2DVars.BIT_BLUE;
-        }
-        else if ((bits & B2DVars.BIT_BLUE) != 0){
-            bits &= ~B2DVars.BIT_BLUE;
-            bits |= B2DVars.BIT_RED;
-        }
-
-        // set new mask bits
-        filter.maskBits = bits;
-        player.getBody().getFixtureList().first().setFilterData(filter);
-
-        //set new mask bits for foot
-        filter = player.getBody().getFixtureList().get(1).getFilterData();
-        bits &= ~B2DVars.BIT_CRYSTAL;
-        filter.maskBits = bits;
-        player.getBody().getFixtureList().get(1).setFilterData(filter);
-    }
-
     private void createWin() {
 
-        MapLayer layer = tiledMap.getLayers().get("win");
+        MapLayer layer = tileMap.getLayers().get("win");
 
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -404,13 +387,13 @@ public class Play extends GameState {
 
             bdef.type = BodyDef.BodyType.StaticBody;
 
-            float x = mo.getProperties().get("x", float.class) / B2DVars.PPM;
-            float y = mo.getProperties().get("y", float.class) / B2DVars.PPM;
+            float x = mo.getProperties().get("x", float.class) / PPM;
+            float y = mo.getProperties().get("y", float.class) / PPM;
 
             bdef.position.set(x, y);
 
             CircleShape cshape = new CircleShape();
-            cshape.setRadius(8 / B2DVars.PPM);
+            cshape.setRadius(8 / PPM);
 
             fdef.shape = cshape;
             fdef.isSensor = true;

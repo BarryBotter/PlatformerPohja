@@ -76,7 +76,7 @@ public class GameButton {
 
         sb.begin();
 
-        sb.draw(reg, x - width / 2, y - height / 2);
+        sb.draw(reg, x - width / 2, y - height / 2,50,50);
 
         if(text != null) {
             drawString(sb, text, x, y);
@@ -98,4 +98,5 @@ public class GameButton {
             sb.draw(font[c], x + i * 9 - xo, y - yo);
         }
     }
+
 }

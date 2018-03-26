@@ -21,7 +21,7 @@ public class Game implements ApplicationListener {
 	public static final int V_HEIGHT = 240;
 	public static final int SCALE = 2;
 
-	public static final float STEP = 1 / 120f;
+	public static final float STEP = 1 / 90f;
 
 	private SpriteBatch sb;
 	private OrthographicCamera cam;
@@ -47,6 +47,8 @@ public class Game implements ApplicationListener {
 		res.loadTexture("res/images/bgs.png","bg");
 		res.loadTexture("res/images/menu.png","menu");
 		res.loadTexture("kuva.png","olvi");
+		res.loadTexture("res/UI_final/rebg.png","menubg");
+		res.loadTexture("res/UI_final/play.png","play");
 
 
 		sb = new SpriteBatch();
