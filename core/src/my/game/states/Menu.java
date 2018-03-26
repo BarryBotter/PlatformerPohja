@@ -33,9 +33,12 @@ public class Menu extends GameState{
     private Background bg;
     private Animation animation;
     private GameButton playButton;
+    private GameButton exitButton;
 
     private World world;
     private Box2DDebugRenderer b2dRenderer;
+
+    private TextureRegion[] menuButtons;
 
 
     public Menu(GameStateManager gsm) {
@@ -54,8 +57,13 @@ public class Menu extends GameState{
         animation = new Animation(reg, 1 / 12f);
 
 
-        tex = Game.res.getTexture("play");
-        playButton = new GameButton(new TextureRegion(tex, 0, 100, 58, 27), 160, 100, cam);
+        tex = Game.res.getTexture("main");
+        menuButtons = new TextureRegion[5];
+        menuButtons[0] =  new TextureRegion(tex, 340, 40, 200, 100);
+        menuButtons[1] =  new TextureRegion(tex, 340, 100, 200, 100);
+        playButton = new GameButton(menuButtons[0], 250, 180, cam);
+        exitButton = new GameButton(menuButtons[1], 150, 180, cam);
+
 
         cam.setToOrtho(false, Game.V_WIDTH, Game.V_HEIGHT);
 

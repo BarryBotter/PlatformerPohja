@@ -5,7 +5,7 @@
  </tileset>
  <layer name="platforms" width="78" height="8">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUjIJRMJQBIxEYBJiR8HAC6P5EB0xoeKQBQukClxpqA/R4gGFi0i+6u3CZhQuDADOJmBqAVDtJcQcA3LwAsQ==
+   eJxjYBgFo2AUEAuYsOBRgBvgC5/hGIaUpg1S9QzlMKRGPqLU35S4gZpxTUg/NeKZVmmEmHAgRR4fZmDAHm741JPq/oHKU+TYDwBg9wCT
   </data>
  </layer>
  <objectgroup name="win">

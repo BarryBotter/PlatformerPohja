@@ -2,9 +2,7 @@ package my.game.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.GL20;
 
-import jdk.nashorn.internal.runtime.Debug;
 import my.game.Game;
 import my.game.entities.Background;
 import my.game.entities.HUD;
@@ -13,7 +11,6 @@ import my.game.entities.Player;
 import my.game.entities.WinBlock;
 import my.game.handlers.B2DVars;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
@@ -30,15 +27,14 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
+import my.game.handlers.BoundedCamera;
 import my.game.handlers.GameStateManager;
 import my.game.handlers.MyContacListener;
-import my.game.handlers.MyInput;
 
 import static my.game.handlers.B2DVars.PPM;
 
@@ -52,7 +48,8 @@ public class Play extends GameState {
     private World world;
     private Box2DDebugRenderer b2dr;
 
-    private OrthographicCamera b2dCam;
+    //private OrthographicCamera b2dCam;
+    private BoundedCamera b2dCam;
 
     private Rectangle screenRightSide;
     private Rectangle screenLeftSide;
@@ -82,18 +79,16 @@ public class Play extends GameState {
         world.setContactListener(cl);
         b2dr = new Box2DDebugRenderer();
 
-        BodyDef bdef = new BodyDef();
-        PolygonShape shape = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
-
         // create player
         cretePlayer();
 
         //create tile
         createWalls();
+        cam.setBounds(0, tileMapWidth * tileSize, 0, tileMapHeight * tileSize);
 
         //create crystals
         createCrystals();
+        player.setTotalCrystals(crystals.size);
 
         //create winblock
         createWin();
@@ -108,9 +103,10 @@ public class Play extends GameState {
         backgrounds[1] = new Background(clouds, cam, 0.1f);
         backgrounds[2] = new Background(mountains, cam, 0.2f);
 
-        //setup box2dcam
-        b2dCam = new OrthographicCamera();
+       /* setup box2dcam
+        b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, Game.V_WIDTH / PPM, Game.V_HEIGHT / PPM);
+        b2dCam.setBounds(0,(tileMapWidth * tileSize) / PPM,0,(tileMapHeight * tileSize ) / PPM);*/
 
         // set up hud
         hud = new HUD(player);
@@ -141,6 +137,12 @@ public class Play extends GameState {
                         player.getBody().setLinearVelocity(player.getBody().getLinearVelocity().x, 0);
                         player.getBody().applyLinearImpulse(0.3f, 6, 0, 0, true);
 
+                        if (player.getBody().getLinearVelocity().x < 0.5f) {
+                            float posX = player.getBody().getPosition().x;
+                            player.getBody().setTransform(posX - 1, 1, 0);
+                            player.getBody().setLinearVelocity(1.5f, 0);
+                        }
+
                     }
 
                 }
@@ -154,13 +156,13 @@ public class Play extends GameState {
             }
         });
 
-        world.step(Game.STEP, 6, 2);
+        world.step(Game.STEP, 1, 1);
 
         //remove pickups
         Array<Body> bodies = cl.getBodiesToRemove();
-        for(int i = 0; i<bodies.size; i++){
+        for (int i = 0; i < bodies.size; i++) {
             Body b = bodies.get(i);
-            crystals.removeValue((PickUp) b.getUserData(), true );
+            crystals.removeValue((PickUp) b.getUserData(), true);
             world.destroyBody(b);
             player.collectCrystal();
         }
@@ -168,12 +170,20 @@ public class Play extends GameState {
 
         player.update(dt);
 
-        for(int i = 0; i < crystals.size; i++){
+        for (int i = 0; i < crystals.size; i++) {
             crystals.get(i).update(dt);
         }
 
-        if(player.getBody().getPosition().y < 0) {
+        if (player.getBody().getPosition().y < 0) {
             gsm.setState(GameStateManager.MENU);
+        }
+
+        if (cl.isPlayerWin() == true) {
+            if (level == 1) {
+                gsm.setState(GameStateManager.LEVEL_SELECT);
+            } else if (level == 3) {
+                gsm.setState(GameStateManager.MENU);
+            }
         }
     }
 
@@ -198,20 +208,15 @@ public class Play extends GameState {
 
     @Override
     public void render() {
-
-        //clear screen
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
         //set cam to follow player
         cam.position.set(
                 player.getposition().x * PPM + Game.V_WIDTH / 4,
-                Game.V_HEIGHT / 2,0);
+                Game.V_HEIGHT / 2, 0);
         cam.update();
 
         // draw bgs
         sb.setProjectionMatrix(hudCam.combined);
-        for(int i = 0; i < backgrounds.length; i++) {
+        for (int i = 0; i < backgrounds.length; i++) {
             backgrounds[i].render(sb);
         }
 
@@ -224,7 +229,7 @@ public class Play extends GameState {
         player.render(sb);
 
         //draw crystals
-        for(int i = 0; i < crystals.size; i++){
+        for (int i = 0; i < crystals.size; i++) {
             crystals.get(i).render(sb);
         }
 
@@ -256,7 +261,7 @@ public class Play extends GameState {
         Body body = world.createBody(bdef);
         body.setGravityScale(3);
 
-        shape.setAsBox(15 / PPM, 15 / PPM);
+        shape.setAsBox(13 / PPM, 15 / PPM);
         fdef.shape = shape;
         fdef.filter.categoryBits = B2DVars.BIT_PLAYER;
         fdef.filter.maskBits = B2DVars.BIT_GROUND | B2DVars.BIT_CRYSTAL;
@@ -281,8 +286,7 @@ public class Play extends GameState {
         // load tile map and map renderer
         try {
             tileMap = new TmxMapLoader().load("res/maps/level" + level + ".tmx");
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("Cannot find file: res/maps/level" + level + ".tmx");
             Gdx.app.exit();
         }
@@ -291,12 +295,12 @@ public class Play extends GameState {
         tileSize = tileMap.getProperties().get("tilewidth", Integer.class);
         tmRenderer = new OrthogonalTiledMapRenderer(tileMap);
 
-        // read each of the "red" "green" and "blue" layers
+
         TiledMapTileLayer layer;
         layer = (TiledMapTileLayer) tileMap.getLayers().get("platforms");
+
+        if (layer != null)
         createBlocks(layer, B2DVars.BIT_GROUND);
-
-
     }
 
 
@@ -306,15 +310,15 @@ public class Play extends GameState {
         float ts = layer.getTileWidth();
 
         // go through all cells in layer
-        for(int row = 0; row < layer.getHeight(); row++) {
-            for(int col = 0; col < layer.getWidth(); col++) {
+        for (int row = 0; row < layer.getHeight(); row++) {
+            for (int col = 0; col < layer.getWidth(); col++) {
 
                 // get cell
                 TiledMapTileLayer.Cell cell = layer.getCell(col, row);
 
                 // check that there is a cell
-                if(cell == null) continue;
-                if(cell.getTile() == null) continue;
+                if (cell == null) continue;
+                if (cell.getTile() == null) continue;
 
                 // create body from cell
                 BodyDef bdef = new BodyDef();
@@ -331,7 +335,7 @@ public class Play extends GameState {
                 fd.shape = cs;
                 fd.filter.categoryBits = bits;
                 fd.filter.maskBits = B2DVars.BIT_PLAYER;
-                world.createBody(bdef).createFixture(fd);
+                world.createBody(bdef).createFixture(fd).setUserData("Ground");
                 cs.dispose();
 
             }
@@ -344,6 +348,8 @@ public class Play extends GameState {
         crystals = new Array<PickUp>();
 
         MapLayer layer = tileMap.getLayers().get("crystals");
+
+        if(layer != null){
 
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -374,11 +380,13 @@ public class Play extends GameState {
 
             body.setUserData(c);
         }
-    }
+    }}
 
     private void createWin() {
 
         MapLayer layer = tileMap.getLayers().get("win");
+
+        if (layer != null){
 
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -408,6 +416,6 @@ public class Play extends GameState {
 
             body.setUserData(win);
         }
-}
-}
+    }
+}}
 

@@ -9,6 +9,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 
+import my.game.states.Play;
+
 /**
  * Created by Katriina on 21.3.2018.
  */
@@ -18,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 public class MyContacListener implements ContactListener{
 
     private int numFootContacts;
+    public boolean wincontact;
     private Array<Body> bodiesToRemove;
 
     public  MyContacListener(){
@@ -43,10 +46,10 @@ public class MyContacListener implements ContactListener{
             bodiesToRemove.add(fb.getBody());
         }
         if(fa.getUserData() != null && fa.getUserData().equals("win")){
-            //playerWin();
+            wincontact = true;
         }
         if(fb.getUserData() != null && fb.getUserData().equals("win")){
-            //playerWin();
+            wincontact = true;
         }
     }
 
@@ -69,6 +72,7 @@ public class MyContacListener implements ContactListener{
         return numFootContacts > 0;
     }
     public Array<Body> getBodiesToRemove(){return bodiesToRemove;}
+    public boolean isPlayerWin(){return wincontact;}
 
 
     @Override

@@ -42,17 +42,7 @@ public class HUD {
     public void render(SpriteBatch sb) {
 
         sb.begin();
-        short bits =
-                player.getBody().getFixtureList().first().getFilterData().maskBits;
-        if ((bits & B2DVars.BIT_RED) != 0) {
-            sb.draw(blocks[0], 40, 200);
-        }
-        if ((bits & B2DVars.BIT_GREEN) != 0) {
-            sb.draw(blocks[1], 40, 200);
-        }
-        if ((bits & B2DVars.BIT_BLUE) != 0) {
-            sb.draw(blocks[2], 40, 200);
-        }
+
         // draw crystal
         sb.draw(crystal, 100, 208);
 

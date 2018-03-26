@@ -3,7 +3,10 @@ package my.game.states;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import javax.swing.BoundedRangeModel;
+
 import my.game.Game;
+import my.game.handlers.BoundedCamera;
 import my.game.handlers.GameStateManager;
 
 /**
@@ -16,7 +19,7 @@ public abstract class GameState {
     protected Game game;
 
     protected SpriteBatch sb;
-    protected OrthographicCamera cam;
+    protected BoundedCamera cam;
     protected OrthographicCamera hudCam;
 
     protected GameState(GameStateManager gsm){

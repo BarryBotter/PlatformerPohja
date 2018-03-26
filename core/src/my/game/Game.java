@@ -1,19 +1,13 @@
 package my.game;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
 
+import my.game.handlers.BoundedCamera;
 import my.game.handlers.Content;
 import my.game.handlers.GameStateManager;
-import my.game.handlers.MyInput;
-import my.game.states.Menu;
 
 public class Game implements ApplicationListener {
 
@@ -23,7 +17,7 @@ public class Game implements ApplicationListener {
 	public static final float STEP = 1 / 90f;
 
 	private SpriteBatch sb;
-	private OrthographicCamera cam;
+	private BoundedCamera cam;
 	private OrthographicCamera hudCam;
 
 	private GameStateManager gsm;
@@ -31,7 +25,7 @@ public class Game implements ApplicationListener {
 	public static Content res;
 
 	public SpriteBatch getSpriteBatch(){return sb;}
-	public OrthographicCamera getCamera(){return cam;}
+	public BoundedCamera getCamera(){return cam;}
 	public OrthographicCamera getHUDCamera(){return hudCam;}
 
 
@@ -47,11 +41,17 @@ public class Game implements ApplicationListener {
 		res.loadTexture("res/images/menu.png","menu");
 		res.loadTexture("kuva.png","olvi");
 		res.loadTexture("res/UI_final/rebg.png","menubg");
-		res.loadTexture("res/UI_final/play.png","play");
+		res.loadTexture("res/UI_final/resized_paavalikko.png","main");
+		res.loadTexture("res/UI_final/resized_hammas.png","tooth");
+		res.loadSound("res/sfx/necksnap.mp3","snap");
 
+		res.loadMusic("res/music/bbsong.ogg");
+		res.getMusic("bbsong").setLooping(true);
+		res.getMusic("bbsong").setVolume(0.5f);
+		res.getMusic("bbsong").play();
 
 		sb = new SpriteBatch();
-		cam = new OrthographicCamera();
+		cam = new BoundedCamera();
 		cam.setToOrtho(false, V_WIDTH,V_HEIGHT);
 		hudCam = new OrthographicCamera();
 		hudCam.setToOrtho(false, V_WIDTH,V_HEIGHT);
@@ -85,7 +85,7 @@ public class Game implements ApplicationListener {
 
 	@Override
 	public void dispose() {
-
+		res.removeAll();
 	}
 
 

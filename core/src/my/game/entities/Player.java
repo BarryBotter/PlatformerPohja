@@ -27,7 +27,7 @@ public class Player extends  B2DSprite{
 
     public void collectCrystal(){numCrystals++;}
     public int getNumCrystals(){return numCrystals;}
-    public void getTotalCrystals(int i){totalCrystals = i;}
+    public void setTotalCrystals(int i){totalCrystals = i;}
     public int getTotalCrystals(){return totalCrystals;}
 
 }
