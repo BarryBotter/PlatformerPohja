@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.1.3" orientation="orthogonal" renderorder="right-down" width="100" height="8" tilewidth="32" tileheight="32" infinite="0" nextobjectid="12">
+ <tileset firstgid="1" source="blocks.tsx"/>
+ <layer name="platforms" width="100" height="8">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo4B6gJEAHgXUBZSG92hckQYGMn2PxLw1VP081NwLA0M1vMkBg8GfIym8yQXUDKPR8KYtIBS+6BgACo4AaQ==
+  </data>
+ </layer>
+ <objectgroup name="win">
+  <object id="1" x="3076" y="152" width="112" height="52"/>
+ </objectgroup>
+</map>
