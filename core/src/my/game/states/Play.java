@@ -139,7 +139,7 @@ public class Play extends GameState {
 
                         if (player.getBody().getLinearVelocity().x < 0.5f) {
                             float posX = player.getBody().getPosition().x;
-                            player.getBody().setTransform(posX - 1, 1, 0);
+                            player.getBody().setTransform(posX - 1, player.getBody().getPosition().y, 0);
                             player.getBody().setLinearVelocity(1.5f, 0);
                         }
 
