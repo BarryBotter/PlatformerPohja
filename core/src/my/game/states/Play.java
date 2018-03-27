@@ -8,7 +8,7 @@ import my.game.entities.Background;
 import my.game.entities.HUD;
 import my.game.entities.PickUp;
 import my.game.entities.Player;
-import my.game.entities.WinBlock;
+import my.game.entities.TextureDraw;
 import my.game.handlers.B2DVars;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -64,7 +64,7 @@ public class Play extends GameState {
 
     private Player player;
     private Array<PickUp> crystals;
-    private WinBlock win;
+    private TextureDraw win;
     private Vector3 touchPoint;
 
     private Background[] backgrounds;
@@ -412,7 +412,7 @@ public class Play extends GameState {
             body.createFixture(fdef).setUserData("win");
             cshape.dispose();
 
-            win = new WinBlock(body);
+            win = new TextureDraw(body, "olvi");
 
             body.setUserData(win);
         }

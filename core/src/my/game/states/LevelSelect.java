@@ -20,7 +20,7 @@ public class LevelSelect extends GameState {
         reg = new TextureRegion(Game.res.getTexture("menubg"), 0, 0, 320, 240);
 
         TextureRegion buttonReg = new TextureRegion(Game.res.getTexture("hud"), 0, 0, 32, 32);
-        buttons = new GameButton[3][2];
+        buttons = new GameButton[3][3];
         for(int row = 0; row < buttons.length; row++) {
             for(int col = 0; col < buttons[0].length; col++) {
                 buttons[row][col] = new GameButton(buttonReg, 150 + col *40, 100 - row * 40, cam);

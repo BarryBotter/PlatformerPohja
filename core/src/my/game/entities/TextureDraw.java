@@ -12,14 +12,14 @@ import my.game.handlers.B2DVars;
  * Created by Katriina on 23.3.2018.
  */
 
-public class WinBlock extends B2DSprite {
+public class TextureDraw extends B2DSprite {
 
     Texture tex;
 
-    public WinBlock(Body body) {
+    public TextureDraw(Body body, String key ) {
         super(body);
 
-        tex = Game.res.getTexture("olvi");
+        tex = Game.res.getTexture(key);
 
     }
     public void render(SpriteBatch sb)
