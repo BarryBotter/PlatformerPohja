@@ -1,5 +1,6 @@
 package my.game.states;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -10,7 +11,16 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import my.game.Game;
 import my.game.entities.B2DSprite;
@@ -31,121 +41,134 @@ public class Menu extends GameState{
     private boolean debug = false;
 
     private Background bg;
-    private Animation animation;
-    private GameButton playButton;
-    private GameButton exitButton;
 
-    private World world;
-    private Box2DDebugRenderer b2dRenderer;
+    int row_height,col_width;
+    Stage stage;
+    Image logo;
+    ExtendViewport viewport;
 
-    private TextureRegion[] menuButtons;
-
-
-    public Menu(GameStateManager gsm) {
-
+    public Menu(final GameStateManager gsm) {
         super(gsm);
 
+        //background
         Texture tex = Game.res.getTexture("menubg");
         bg = new Background(new TextureRegion(tex),hudCam,5 );
         bg.setVector(0, 0);
 
-        tex = Game.res.getTexture("bunny");
-        TextureRegion[] reg = new TextureRegion[4];
-        for(int i = 0; i < reg.length; i++) {
-            reg[i] = new TextureRegion(tex, i * 32, 0, 32, 32);
-        }
-        animation = new Animation(reg, 1 / 12f);
-
-
-        tex = Game.res.getTexture("main");
-        menuButtons = new TextureRegion[5];
-        menuButtons[0] =  new TextureRegion(tex, 340, 40, 200, 100);
-        menuButtons[1] =  new TextureRegion(tex, 340, 100, 200, 100);
-        playButton = new GameButton(menuButtons[0], 250, 180, cam);
-        exitButton = new GameButton(menuButtons[1], 150, 180, cam);
-
-
         cam.setToOrtho(false, Game.V_WIDTH, Game.V_HEIGHT);
 
-        world = new World(new Vector2(0, -9.8f * 5), true);
-        //world = new World(new Vector2(0, 0), true);
-        b2dRenderer = new Box2DDebugRenderer();
+        //viewport = new ExtendViewport(1920, 1080, cam);
 
-        createTitleBodies();
+        logo = new Image(new Texture("res/UI_final/menu_logo.png"));;
+
+        row_height = 1080 / 12;
+        col_width = 1920 / 12;
+
+        //skin and stage
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+        Skin mySkin = new Skin(Gdx.files.internal("res/skin/glassy-ui.json"));
+
+        ImageButton playButton = new ImageButton(mySkin);
+        playButton.setStyle(gsm.playButtonStyle);
+        playButton.setSize(col_width*2,row_height*2);
+        playButton.setScale(2f,2f);
+        playButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+              game.snap.play(1f);
+                dispose();
+                gsm.setState(GameStateManager.LEVEL_SELECT);
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+
+        ImageButton optionsButton = new ImageButton(mySkin);
+        optionsButton.setStyle(gsm.optionButtonStyle);
+        optionsButton.setSize(col_width,row_height);
+        optionsButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+                game.snap.play(1f);
+/*                dispose(); todo Options menu not working atm might be about preferences
+                gsm.setState(GameStateManager.OPTIONS);*/
+            }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+
+        ImageButton exitButton = new ImageButton(mySkin);
+        exitButton.setStyle(gsm.exitButtonStyle);
+        exitButton.setSize(col_width,row_height);
+        exitButton.addListener(new InputListener(){
+            @Override
+            public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
+
+                Gdx.app.exit();
+                }
+            @Override
+            public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+        });
+
+        tableLayout(optionsButton,playButton,exitButton);
 
     }
 
-    private void createTitleBodies() {
-
-        // top platform
-        BodyDef tpbdef = new BodyDef();
-        tpbdef.type = BodyDef.BodyType.StaticBody;
-        tpbdef.position.set(160 / PPM, 180 / PPM);
-        Body tpbody = world.createBody(tpbdef);
-        PolygonShape tpshape = new PolygonShape();
-        tpshape.setAsBox(120 / PPM, 1 / PPM);
-        FixtureDef tpfdef = new FixtureDef();
-        tpfdef.shape = tpshape;
-        tpfdef.filter.categoryBits = B2DVars.BIT_TOP_PLATFORM;
-        tpfdef.filter.maskBits = B2DVars.BIT_TOP_BLOCK;
-        tpbody.createFixture(tpfdef);
-        tpshape.dispose();
-
+    private void tableLayout(ImageButton optionsButton, ImageButton playButton, ImageButton exitButton) {
+        Table table = new Table();
+        Table table1 = new Table();
+        table.center();
+        table.row();//first row
+        table.add(optionsButton).width(col_width*2);
+        table.row();//second row
+        table.add();
+        table.add(logo).colspan(2).height(750);
+        table.add().width(col_width);
+        table.add(table1); //nested table
+        table1.add(playButton);
+        table1.row();
+        table1.add().height(row_height);
+        table1.row();
+        table1.add(exitButton);
+        table.row();//third row
+        table.add().colspan(5).height(row_height*3);
+        table.setFillParent(true);
+        stage.addActor(table);
+        //table.debug();      // Turn on all debug lines (table, cell, and widget).
     }
-
-
-
-
 
 
     public void handleInput() {
 
-        if(playButton.isClicked()) {
-            gsm.setState(GameStateManager.LEVEL_SELECT);
-        }
-
     }
 
     public void update(float dt) {
-
         handleInput();
-
-        world.step(dt / 5, 8, 3);
-
         bg.update(dt);
-        animation.update(dt);
-
-        playButton.update(dt);
-
     }
 
     public void render() {
-
         sb.setProjectionMatrix(cam.combined);
-
         // draw background
         bg.render(sb);
-
-        // draw button
-        playButton.render(sb);
-
-        // draw bunny
         sb.begin();
-        sb.draw(animation.getFrame(), 146, 31);
         sb.end();
-
-        // debug draw box2d
-        if(debug) {
-            cam.setToOrtho(false, Game.V_WIDTH / PPM, Game.V_HEIGHT / PPM);
-            b2dRenderer.render(world, cam.combined);
-            cam.setToOrtho(false, Game.V_WIDTH, Game.V_HEIGHT);
-        }
-
+        //stage for menubutton layout
+        stage.act();
+        stage.draw();
     }
 
     public void dispose() {
-
+        //stage.dispose();
     }
+
 
 }
 

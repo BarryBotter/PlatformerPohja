@@ -30,6 +30,8 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 
 import my.game.handlers.BoundedCamera;
@@ -50,14 +52,10 @@ public class Play extends GameState {
 
     //private OrthographicCamera b2dCam;
     private BoundedCamera b2dCam;
-
-    private Rectangle screenRightSide;
-    private Rectangle screenLeftSide;
+    private Rectangle screenRightSide,screenLeftSide;
 
     private TiledMap tileMap;
-    private int tileMapWidth;
-    private int tileMapHeight;
-    private int tileSize;
+    private int tileMapWidth,tileMapHeight,tileSize;
     private OrthogonalTiledMapRenderer tmRenderer;
 
     private MyContacListener cl;
@@ -70,6 +68,7 @@ public class Play extends GameState {
     private Background[] backgrounds;
 
     private HUD hud;
+
 
     public Play(GameStateManager gsm) {
         super(gsm);
@@ -114,6 +113,7 @@ public class Play extends GameState {
         //setup touch areas
         setupTouchControlAreas();
     }
+
 
     @Override
     public void handleInput() {
